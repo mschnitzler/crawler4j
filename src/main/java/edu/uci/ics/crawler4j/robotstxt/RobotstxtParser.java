@@ -17,6 +17,11 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.StringTokenizer;
 
 /**
@@ -26,13 +31,17 @@ import java.util.StringTokenizer;
 
 public class RobotstxtParser {
 
+  private static final Logger logger = LoggerFactory.getLogger(RobotstxtParser.class);
+
   private static final String PATTERNS_USERAGENT = "(?i)^User-agent:.*";
   private static final String PATTERNS_DISALLOW = "(?i)Disallow:.*";
   private static final String PATTERNS_ALLOW = "(?i)Allow:.*";
+  private static final String PATTERNS_SITEMAP = "(?i)Sitemap:.*";
 
   private static final int PATTERNS_USERAGENT_LENGTH = 11;
   private static final int PATTERNS_DISALLOW_LENGTH = 9;
   private static final int PATTERNS_ALLOW_LENGTH = 6;
+  private static final int PATTERNS_SITEMAP_LENGTH = 8;
 
   public static HostDirectives parse(String content, String myUserAgent) {
 
@@ -88,6 +97,21 @@ public class RobotstxtParser {
           directives = new HostDirectives();
         }
         directives.addAllow(path);
+      }
+      else {
+        if (line.matches(PATTERNS_SITEMAP)) {
+          String sitemapUrl = line.substring(PATTERNS_SITEMAP_LENGTH).trim();
+          if (directives == null) {
+            directives = new HostDirectives();
+          }
+          try {
+            URL url = new URL(sitemapUrl);
+            directives.addSitemap(url);
+          }
+          catch(MalformedURLException e) {
+            logger.warn("ignoring malformed sitemap URL: {}", sitemapUrl);
+          }
+        }
       }
     }
 

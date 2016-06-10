@@ -17,6 +17,10 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Yasser Ganjisaffar
  */
@@ -28,6 +32,7 @@ public class HostDirectives {
 
   private final RuleSet disallows = new RuleSet();
   private final RuleSet allows = new RuleSet();
+  private final Set<URL> sitemaps = new HashSet<>();
 
   private final long timeFetched;
   private long timeLastAccessed;
@@ -53,7 +58,11 @@ public class HostDirectives {
     allows.add(path);
   }
 
+  public void addSitemap(URL sitemapUrl) { sitemaps.add(sitemapUrl); }
+
   public long getLastAccessTime() {
     return timeLastAccessed;
   }
+
+  public Set<URL> getSitemaps() { return sitemaps; };
 }

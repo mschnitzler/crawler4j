@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class RobotstxtParserNonLowercaseUserAgentTest {
 
@@ -17,6 +18,24 @@ public class RobotstxtParserNonLowercaseUserAgentTest {
     HostDirectives hostDirectives = RobotstxtParser.parse(content, userAgent);
     assertNotNull("parsed HostDirectives is null", hostDirectives);
     assertFalse("HostDirectives should not allow path: '/test/path/'", hostDirectives.allows("/test/path/"));
+  }
+
+  @Test
+  public void testParseSitemapUrl() {
+    String userAgent = "testAgent";
+    String content = "Sitemap: http://localhost/sitemap.xml\n";
+    HostDirectives hostDirectives = RobotstxtParser.parse(content, userAgent);
+    assertNotNull("parsed HostDirectives is null", hostDirectives);
+    assertTrue("Sitemap URL should not be empty", hostDirectives.getSitemaps().size() == 1);
+  }
+
+  @Test
+  public void testParseMalformedSitemapUrl() {
+    String userAgent = "testAgent";
+    String content = "Sitemap: httpx://localhost/sitemap.xml\n";
+    HostDirectives hostDirectives = RobotstxtParser.parse(content, userAgent);
+    assertNotNull("parsed HostDirectives is null", hostDirectives);
+    assertTrue("Sitemap URL should be empty", hostDirectives.getSitemaps().size() == 0);
   }
 
 }
