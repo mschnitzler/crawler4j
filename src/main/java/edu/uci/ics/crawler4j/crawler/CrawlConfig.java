@@ -165,6 +165,12 @@ public class CrawlConfig {
   private List<AuthInfo> authInfos;
 
   /**
+   * Should the crawler fetch the sitemap from robots.txt and seed the
+   * sitemap locations?
+   */
+  private boolean useSitemap = false;
+
+  /**
    * Validates the configs specified by this instance.
    *
    * @throws Exception on Validation fail
@@ -495,6 +501,10 @@ public class CrawlConfig {
     this.authInfos = authInfos;
   }
 
+  public boolean isUseSitemap() { return useSitemap; }
+
+  public void setUseSitemap(boolean useSitemap) { this.useSitemap = useSitemap; };
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -516,6 +526,7 @@ public class CrawlConfig {
     sb.append("Proxy port: " + getProxyPort() + "\n");
     sb.append("Proxy username: " + getProxyUsername() + "\n");
     sb.append("Proxy password: " + getProxyPassword() + "\n");
+    sb.append("Use Sitemap: " + isUseSitemap() + "\n");
     return sb.toString();
   }
 }
