@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import edu.uci.ics.crawler4j.url.WebURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,13 +105,9 @@ public class RobotstxtParser {
           if (directives == null) {
             directives = new HostDirectives();
           }
-          try {
-            URL url = new URL(sitemapUrl);
-            directives.addSitemap(url);
-          }
-          catch(MalformedURLException e) {
-            logger.warn("ignoring malformed sitemap URL: {}", sitemapUrl);
-          }
+          WebURL url = new WebURL();
+          url.setURL(sitemapUrl);
+          directives.addSitemap(url);
         }
       }
     }

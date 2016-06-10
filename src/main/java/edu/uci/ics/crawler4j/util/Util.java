@@ -80,4 +80,10 @@ public class Util {
     return typeStr.contains("text") && !typeStr.contains("html");
   }
 
+  public static boolean hasXmlContent(String contentType) {
+    String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
+
+    return typeStr.contains("xml");
+  }
+
 }

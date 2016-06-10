@@ -430,6 +430,10 @@ public class CrawlController extends Configurable {
         logger.warn("Robots.txt does not allow this seed: {}",
                     pageUrl); // using the WARN level here, as the user specifically asked to add this seed
       }
+
+      if (config.isUseSitemap()) {
+        seedSitemapLocations(webUrl);
+      }
     }
   }
 
@@ -460,6 +464,10 @@ public class CrawlController extends Configurable {
         logger.error("Could not add seen url: {}", e.getMessage());
       }
     }
+  }
+
+  private void seedSitemapLocations(WebURL webUrl) {
+    robotstxtServer.getSitemap(webUrl);
   }
 
   public PageFetcher getPageFetcher() {

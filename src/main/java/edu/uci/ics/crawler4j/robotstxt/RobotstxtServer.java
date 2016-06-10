@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -25,6 +26,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.uci.ics.crawler4j.robotstxt.sitemap.Sitemap;
+import edu.uci.ics.crawler4j.robotstxt.sitemap.SitemapParser;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
 import org.slf4j.Logger;
@@ -36,6 +39,9 @@ import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.Util;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * @author Yasser Ganjisaffar
@@ -47,6 +53,8 @@ public class RobotstxtServer {
   protected RobotstxtConfig config;
 
   protected final Map<String, HostDirectives> host2directivesCache = new HashMap<>();
+
+  protected final Map<String, Sitemap> host2SitemapCache = new HashMap<>();
 
   protected PageFetcher pageFetcher;
 
@@ -87,6 +95,62 @@ public class RobotstxtServer {
     }
 
     return true;
+  }
+
+  public Sitemap getSitemap(WebURL webURL) {
+    if (config.isEnabled()) {
+      try {
+        URL url = new URL(webURL.getURL());
+        String host = getHost(url);
+
+        HostDirectives directives = host2directivesCache.get(host);
+
+        if ((directives != null) && directives.needsRefetch()) {
+          synchronized (host2directivesCache) {
+            host2directivesCache.remove(host);
+            host2SitemapCache.remove(host);
+            directives = null;
+          }
+        }
+
+        if (directives == null) {
+          directives = fetchDirectives(url);
+        }
+
+        for(WebURL sitemapURL : directives.getSitemaps()) {
+          PageFetchResult fetchResult = pageFetcher.fetchPage(sitemapURL);
+          if (fetchResult.getStatusCode() == HttpStatus.SC_OK) {
+            Page page = new Page(sitemapURL);
+            fetchResult.fetchContent(page);
+            if (Util.hasXmlContent(page.getContentType())) {
+              String content;
+              if (page.getContentCharset() == null) {
+                content = new String(page.getContentData());
+              } else {
+                content = new String(page.getContentData(), page.getContentCharset());
+              }
+              SitemapParser.parse(content);
+            } else if (page.getContentType().contains("html")) { // TODO This one should be upgraded to remove all html tags
+              String content = new String(page.getContentData());
+              directives = RobotstxtParser.parse(content, config.getUserAgentName());
+            } else {
+              logger.warn("Can't read this robots.txt: {}  as it is not written in plain text, contentType: {}",
+                      sitemapURL.getURL(), page.getContentType());
+            }
+          }
+        }
+      } catch (MalformedURLException e) {
+        logger.error("Bad URL in Robots.txt: " + webURL.getURL(), e);
+      } catch (InterruptedException | PageBiggerThanMaxSizeException | IOException e) {
+        e.printStackTrace();
+      } catch (ParserConfigurationException e) {
+        e.printStackTrace();
+      } catch (SAXException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return new Sitemap();
   }
 
   private HostDirectives fetchDirectives(URL url) {
