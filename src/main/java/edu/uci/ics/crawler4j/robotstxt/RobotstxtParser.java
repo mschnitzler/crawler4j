@@ -17,10 +17,21 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import edu.uci.ics.crawler4j.crawler.Page;
+import edu.uci.ics.crawler4j.crawler.exceptions.PageBiggerThanMaxSizeException;
+import edu.uci.ics.crawler4j.fetcher.PageFetchResult;
+import edu.uci.ics.crawler4j.fetcher.PageFetcher;
+import edu.uci.ics.crawler4j.robotstxt.sitemap.AbstractSitemapObject;
+import edu.uci.ics.crawler4j.robotstxt.sitemap.SitemapParser;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.util.Util;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.StringTokenizer;
@@ -107,7 +118,7 @@ public class RobotstxtParser {
           }
           WebURL url = new WebURL();
           url.setURL(sitemapUrl);
-          directives.addSitemap(url);
+          directives.addSitemapURL(url);
         }
       }
     }

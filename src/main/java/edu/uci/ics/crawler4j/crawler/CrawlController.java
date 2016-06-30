@@ -18,8 +18,6 @@
 package edu.uci.ics.crawler4j.crawler;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +34,6 @@ import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
 import edu.uci.ics.crawler4j.util.IO;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -381,6 +375,10 @@ public class CrawlController extends Configurable {
     addSeed(pageUrl, -1);
   }
 
+  public void addSeed(String pageUrl, int docId) {
+    addSeed(pageUrl, docId, false);
+  }
+
   /**
    * Adds a new seed URL. A seed URL is a URL that is fetched by the crawler
    * to extract new URLs in it and follow them for crawling. You can also
@@ -398,9 +396,11 @@ public class CrawlController extends Configurable {
    *            the URL of the seed
    * @param docId
    *            the document id that you want to be assigned to this seed URL.
+   * @param isURLfromSitemap
+   *            if true then the sitemap for the URL will not be fetched
    *
    */
-  public void addSeed(String pageUrl, int docId) {
+  private void addSeed(String pageUrl, int docId, boolean isURLfromSitemap) {
     String canonicalUrl = URLCanonicalizer.getCanonicalURL(pageUrl);
     if (canonicalUrl == null) {
       logger.error("Invalid seed URL: {}", pageUrl);
@@ -431,8 +431,16 @@ public class CrawlController extends Configurable {
                     pageUrl); // using the WARN level here, as the user specifically asked to add this seed
       }
 
-      if (config.isUseSitemap()) {
-        seedSitemapLocations(webUrl);
+      /*
+      if "use sitemap" is enabled and the given seed URL was not already fetched from sitemap
+      then fetch the locations from the sitemap(s) and seed these URLs
+       */
+
+      if (config.isUseSitemap() && ! isURLfromSitemap) {
+        List<WebURL> sitemapURLs = robotstxtServer.getSitemapURLs(webUrl);
+        for (WebURL sitemapURL : sitemapURLs) {
+          addSeed(sitemapURL.getURL(), -1, true);
+        }
       }
     }
   }
@@ -464,10 +472,6 @@ public class CrawlController extends Configurable {
         logger.error("Could not add seen url: {}", e.getMessage());
       }
     }
-  }
-
-  private void seedSitemapLocations(WebURL webUrl) {
-    robotstxtServer.getSitemap(webUrl);
   }
 
   public PageFetcher getPageFetcher() {

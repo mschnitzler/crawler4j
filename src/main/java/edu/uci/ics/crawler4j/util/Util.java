@@ -18,6 +18,12 @@
 package edu.uci.ics.crawler4j.util;
 
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
+
 /**
  * @author Yasser Ganjisaffar
  */
@@ -67,6 +73,19 @@ public class Util {
     return value;
   }
 
+  public static String gzipByteArray2String(byte[] b) throws IOException {
+    ByteArrayInputStream bais = new ByteArrayInputStream(b);
+    GZIPInputStream gzis = new GZIPInputStream(bais);
+    InputStreamReader reader = new InputStreamReader(gzis,"UTF-8");
+    BufferedReader in = new BufferedReader(reader);
+
+    StringBuffer sb = new StringBuffer();
+    String read;
+    while ((read = in.readLine()) != null) {
+      sb.append(read);}
+    return sb.toString();
+  }
+
   public static boolean hasBinaryContent(String contentType) {
     String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
 
@@ -84,6 +103,12 @@ public class Util {
     String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
 
     return typeStr.contains("xml");
+  }
+
+  public static boolean hasGzipContent(String contentType) {
+    String typeStr = (contentType != null) ? contentType.toLowerCase() : "";
+
+    return typeStr.contains("gzip");
   }
 
 }

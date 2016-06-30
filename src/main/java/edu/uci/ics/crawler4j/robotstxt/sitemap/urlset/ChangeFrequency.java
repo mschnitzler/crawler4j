@@ -1,4 +1,4 @@
-package edu.uci.ics.crawler4j.robotstxt.sitemap;
+package edu.uci.ics.crawler4j.robotstxt.sitemap.urlset;
 
 /**
  * Created by michael_schnitzler on 10.06.2016.

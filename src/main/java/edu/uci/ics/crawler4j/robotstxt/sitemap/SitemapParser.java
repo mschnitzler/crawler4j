@@ -15,10 +15,11 @@ import java.io.StringReader;
  */
 public class SitemapParser {
 
-    public static void parse(String xml) throws ParserConfigurationException, SAXException, IOException {
+    public static AbstractSitemapObject parse(String xml) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
-        DefaultHandler handler = new SitemapHandler();
+        SitemapHandler handler = new SitemapHandler();
         saxParser.parse(new InputSource(new StringReader(xml)), handler);
+        return handler.getAbstractSitemapObject();
     }
 }

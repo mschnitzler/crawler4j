@@ -17,6 +17,7 @@
 
 package edu.uci.ics.crawler4j.robotstxt;
 
+import edu.uci.ics.crawler4j.robotstxt.sitemap.AbstractSitemapObject;
 import edu.uci.ics.crawler4j.url.WebURL;
 
 import java.net.URL;
@@ -34,7 +35,8 @@ public class HostDirectives {
 
   private final RuleSet disallows = new RuleSet();
   private final RuleSet allows = new RuleSet();
-  private final Set<WebURL> sitemaps = new HashSet<>();
+  private final Set<WebURL> sitemapURLs = new HashSet<>();  // holds the Sitemap URLs configured in robots.txt
+  private final Set<AbstractSitemapObject> sitemaps = new HashSet<>();  // holds the resolved sitemap objects
 
   private final long timeFetched;
   private long timeLastAccessed;
@@ -60,11 +62,15 @@ public class HostDirectives {
     allows.add(path);
   }
 
-  public void addSitemap(WebURL sitemapUrl) { sitemaps.add(sitemapUrl); }
+  public void addSitemapURL(WebURL url) { sitemapURLs.add(url); }
+
+  public void addSitemap(AbstractSitemapObject asmo) { sitemaps.add(asmo); }
 
   public long getLastAccessTime() {
     return timeLastAccessed;
   }
 
-  public Set<WebURL> getSitemaps() { return sitemaps; };
+  public Set<WebURL> getSitemapURLs() { return sitemapURLs; }
+
+  public Set<AbstractSitemapObject> getSitemaps() { return sitemaps; };
 }
